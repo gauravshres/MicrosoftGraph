@@ -1,0 +1,30 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      [
+        "build",
+        "-t",
+        "gcr.io/$PROJECT_ID/msgraphapi:${SHORT_SHA}",
+        "-t",
+        "gcr.io/$PROJECT_ID/msgraphapi:${BRANCH_NAME}",
+        "--build-arg",
+        "COMMIT_SHA=${SHORT_SHA}",
+        "--build-arg",
+        "BRANCH_NAME=${BRANCH_NAME}",
+        ".",
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/msgraphapi"]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "beta",
+        "run",
+        "deploy",
+        "$PROJECT_ID",
+        "--region=us-central1",
+        "--platform=managed",
+        "--image=gcr.io/$PROJECT_ID/msgraphapi:${SHORT_SHA}",
+      ]
